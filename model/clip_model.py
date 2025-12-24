@@ -426,7 +426,7 @@ class CLIP(nn.Module):
         return x
     
 
-    # "A photo of a S* person"  每个图像一个pseudo token
+    # "A photo of a S* person"  
     def encode_text_img_composed(self, text, img_tokens, split_ind=5, repeat=False):
         # text.shape = [1, n_ctx]   torch.Size([64, 77])
         # img_tokens.shape = [batch_size, d_model]    torch.Size([64, 512])    
@@ -447,59 +447,21 @@ class CLIP(nn.Module):
                 x = torch.cat([x[:, :split_ind], img, x[:, split_ind+1:]], dim=1)
         else:
             img_tokens = img_tokens.view(b_size, 1, -1)  # torch.Size([64, 1, 512])
-            x = torch.cat([x[:, :split_ind], img_tokens, x[:, split_ind+1:]], dim=1)  # torch.Size([64, 77, 512])
+            x = torch.cat([x[:, :split_ind], img_tokens, x[:, split_ind+1:]], dim=1)  
         #x = torch.cat([x, torch.zeros_like(x).cuda()[:, :1, :]], dim=1)
         x = x + self.positional_embedding.type(self.dtype)
-        x = x.permute(1, 0, 2)  # NLD -> LND  # torch.Size([77, 64, 512])
+        x = x.permute(1, 0, 2)  # NLD -> LND  
         x = self.transformer(x)
         x = x.permute(1, 0, 2)  # LND -> NLD
-        x = self.ln_final(x).type(self.dtype)  # torch.Size([77, 64, 512])
+        x = self.ln_final(x).type(self.dtype)  
         # take features from the eot embedding (eot_token is the highest number in each sequence)    
-        # x = x[torch.arange(x.size(0)), collect_ind+1] @ self.text_projection  # torch.Size([64, 512])
-        # x = x @ self.text_projection  # torch.Size([64, 77, 512])
-        x = x[torch.arange(x.size(0)), collect_ind+1] @ self.text_projection  # torch.Size([64, 512])
+        # x = x[torch.arange(x.size(0)), collect_ind+1] @ self.text_projection  
+        # x = x @ self.text_projection  
+        x = x[torch.arange(x.size(0)), collect_ind+1] @ self.text_projection  
 
         return x
 
 
-    # # "A photo of a S* person"  每个图像多个pseudo token
-    # def encode_text_img_composed(self, text, img_tokens, split_ind=5, repeat=False):
-    #     # text.shape = [batch_size, n_ctx]   torch.Size([64, 77])
-    #     # img_tokens.shape = [batch_size, num_tokens, d_model]    torch.Size([64, 4, 512])    
-      
-    #     if isinstance(img_tokens, tuple):
-    #         b_size = img_tokens[0].shape[0]
-    #     else:
-    #         b_size = img_tokens.shape[0]
-    #     if repeat:            
-    #         text = text.repeat(b_size, 1)  # torch.Size([4096, 77])
-    #     x = self.token_embedding(text).type(self.dtype)  # [batch_size, n_ctx, d_model] torch.Size([64, 77, 512])
-    #     collect_ind = text == self.end_id   # torch.Size([64, 77])
-    #     collect_ind = collect_ind.nonzero()[:, 1]  # torch.Size([64, 77])
-  
-    #     if isinstance(img_tokens, tuple):
-    #         for i, img_token in enumerate(img_tokens):
-    #             img = img_token.view(b_size, 1, -1)
-    #             x = torch.cat([x[:, :split_ind], img, x[:, split_ind+1:]], dim=1)
-    #     else:
-    #         num_img_tokens = img_tokens.shape[1]
-    #         x = torch.cat([
-    #         x[:, :split_ind],         # 保留插入点前的文本
-    #         img_tokens,               # 插入多token [batch, num_tokens, dim]
-    #         x[:, split_ind + num_img_tokens:]  # 截取插入点后的剩余文本
-    #     ], dim=1)  # 最终维度保持 [batch_size, n_ctx, d_model]
-
-    #     #x = torch.cat([x, torch.zeros_like(x).cuda()[:, :1, :]], dim=1)
-    #     x = x + self.positional_embedding.type(self.dtype)
-    #     x = x.permute(1, 0, 2)  # NLD -> LND  # torch.Size([77, 64, 512])
-    #     x = self.transformer(x)
-    #     x = x.permute(1, 0, 2)  # LND -> NLD
-    #     x = self.ln_final(x).type(self.dtype)  # torch.Size([77, 64, 512])
-    #     # take features from the eot embedding (eot_token is the highest number in each sequence)    
-    #     x = x[torch.arange(x.size(0)), collect_ind+1] @ self.text_projection  # torch.Size([64, 512])
-    #     #x = x @ self.text_projection  # torch.Size([64, 77, 512])
-        
-    #     return x
 
 
     def forward(self, image, text):
