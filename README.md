@@ -1,6 +1,6 @@
-# *Consensus Labelling: Prompt-Guided Clustering Refinement for Weakly Supervised Text-based Person Re-Identification*
+# **Consensus Labelling: Prompt-Guided Clustering Refinement for Weakly Supervised Text-based Person Re-Identification**
 
-# Authors: Chengji Wang，Weizhi Nie, Hongbo Zhang, Hao Sun, and Mang Ye
+## Authors: Chengji Wang，Weizhi Nie, Hongbo Zhang, Hao Sun, and Mang Ye
 
 ## Highlights
 
