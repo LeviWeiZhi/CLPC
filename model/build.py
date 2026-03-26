@@ -145,7 +145,7 @@ class CLPC(nn.Module):
                 ret.update({'ndm_loss':objectives.compute_ndm(i_feats, t_feats, i_feats_m, pm_feats.clone().detach(), image_pseudo_labels, logit_scale)})
 
             if 'dmt' in self.current_task:
-                mar = 0.1 + 0.1 / (1 + math.exp(-1 * (epoch - 10)))
+                mar = 0.1 + 0.2 / (1 + math.exp(-1 * (epoch - 10)))
                 margin = round(mar, 3)
                 ret.update({'dmt_loss':objectives.compute_dmt(i_feats, t_feats, image_pseudo_labels, margin)}) 
 
